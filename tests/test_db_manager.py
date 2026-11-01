@@ -5,7 +5,6 @@ from unittest.mock import MagicMock, patch
 from config import config
 from src.db_manager import DBManager
 
-
 DB_MANAGER = DBManager()
 
 
