@@ -1,4 +1,6 @@
+from textwrap import dedent
 from unittest.mock import MagicMock, call, patch
+
 from src.db_creation import save_to_database, setup_database
 
 
@@ -27,35 +29,38 @@ def test_setup_database(mock_connect):
     mock_connect.assert_any_call(dbname="hh_ru", **params)
 
     expected_calls = [
-        # 1. Завершение бэкендов
         call(
-            """SELECT pg_terminate_backend(pid)
-                        FROM pg_stat_activity
-                        WHERE datname = 'hh_ru'
-                        AND pid <> pg_backend_pid();"""
+            dedent("""
+                SELECT pg_terminate_backend(pid)
+                FROM pg_stat_activity
+                WHERE datname = 'hh_ru'
+                  AND pid <> pg_backend_pid();
+            """).strip()
         ),
-        # 2. DROP DATABASE
-        call(f"DROP DATABASE {database_name}"),
-        # 3. CREATE DATABASE
-        call(f"CREATE DATABASE {database_name}"),
-        # 4. CREATE TABLE employers
+        call("DROP DATABASE IF EXISTS hh_ru"),
+        call("CREATE DATABASE hh_ru"),
         call(
-            """CREATE TABLE employers (
-                        employer_id INT PRIMARY KEY,
-                        name TEXT)
-                        """
+            dedent("""
+                CREATE TABLE employers (
+                    employer_id TEXT PRIMARY KEY,
+                    name TEXT
+                )
+            """).strip()
         ),
-        # 5. CREATE TABLE vacancies
         call(
-            """CREATE TABLE vacancies (
-                        vacancy_id INT PRIMARY KEY,
-                        employer_id INT REFERENCES employers(employer_id),
-                        name TEXT,
-                        salary INT,
-                        url TEXT)
-                        """
+            dedent("""
+                CREATE TABLE vacancies (
+                    vacancy_id TEXT PRIMARY KEY,
+                    employer_id TEXT REFERENCES employers(employer_id),
+                    name TEXT,
+                    salary INT,
+                    url TEXT
+                )
+            """).strip()
         ),
     ]
+
+    mock_cur.execute.assert_has_calls(expected_calls, any_order=False)
 
     mock_cur.execute.assert_has_calls(expected_calls, any_order=False)
 
@@ -114,35 +119,48 @@ def test_save_to_database(mock_connect):
     mock_conn.commit.assert_called_once()
     mock_conn.close.assert_called_once()
     expected_calls = [
-        # 1. INSERT INTO employers (для Company A)
         call(
-            """INSERT INTO employers (employer_id, name)
-                        VALUES (%s, %s)
-                        RETURNING employer_id""",
+            dedent("""
+                INSERT INTO employers (employer_id, name)
+                VALUES (%s, %s)
+                RETURNING employer_id
+            """).strip(),
             ("E100", "Company A"),
         ),
-        # 2. INSERT INTO vacancies (для Dev, salary avg(50k, 70k) = 60000)
         call(
-            """INSERT INTO vacancies (vacancy_id, employer_id, name, salary, url)
-                                    VALUES (%s, %s, %s, %s, %s)""",
+            dedent("""
+                INSERT INTO vacancies
+                    (vacancy_id, employer_id, name, salary, url)
+                VALUES (%s, %s, %s, %s, %s)
+            """).strip(),
             ("V001", "E100", "Dev", 60000, "http://url1.com"),
         ),
-        # 3. INSERT INTO vacancies (для QA, salary None)
         call(
-            """INSERT INTO vacancies (vacancy_id, employer_id, name, salary, url)
-                                    VALUES (%s, %s, %s, %s, %s)""",
+            dedent("""
+                INSERT INTO vacancies
+                    (vacancy_id, employer_id, name, salary, url)
+                VALUES (%s, %s, %s, %s, %s)
+            """).strip(),
             ("V002", "E100", "QA", None, "http://url2.com"),
         ),
         call(
-            """INSERT INTO vacancies (vacancy_id, employer_id, name, salary, url)
-                                    VALUES (%s, %s, %s, %s, %s)""",
+            dedent("""
+                INSERT INTO vacancies
+                    (vacancy_id, employer_id, name, salary, url)
+                VALUES (%s, %s, %s, %s, %s)
+            """).strip(),
             ("V003", "E100", "Dev", 70000, "http://url3.com"),
         ),
         call(
-            """INSERT INTO vacancies (vacancy_id, employer_id, name, salary, url)
-                                    VALUES (%s, %s, %s, %s, %s)""",
+            dedent("""
+                INSERT INTO vacancies
+                    (vacancy_id, employer_id, name, salary, url)
+                VALUES (%s, %s, %s, %s, %s)
+            """).strip(),
             ("V004", "E100", "QA", 50000, "http://url4.com"),
         ),
     ]
+
+    mock_cur.execute.assert_has_calls(expected_calls, any_order=False)
 
     mock_cur.execute.assert_has_calls(expected_calls, any_order=False)
