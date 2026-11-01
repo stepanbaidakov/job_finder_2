@@ -25,7 +25,7 @@ MOCK_VACANCIES_PAGE_1 = {
 }
 
 
-@patch("requests.get")
+@patch("src.hh_api.requests.Session.get")
 def test_get_data(mock_get):
     """
     Тестирует функцию для одного работодателя, имитируя 2 страницы вакансий.

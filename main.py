@@ -28,61 +28,63 @@ def main():
     db_manager = DBManager()
 
     user_input = input(
-        "Вы хотите получить список всех компаний и количество вакансий у каждой компании? да/нет: "
-    ).lower()
-    if user_input == "да":
+        "Would you like to see all companies and the number of vacancies at each company? (yes/no): "
+    ).casefold()
+    if user_input == "yes":
         return_list = db_manager.get_companies_and_vacancies_count()
         for company in return_list:
             print(
-                f"Компания: {company["company"]}, количество вакансий: {company["vacancies"]}"
+                f"Company: {company['company']}, "
+                f"Number of vacancies: {company['vacancies_amount']}"
             )
 
     user_input = input(
-        "Хотите получить список всех вакансий с указанием названия компании, названия вакансии и зарплаты и ссылки"
-        " на вакансию? да/нет: "
-    )
-    if user_input == "да":
+        "Would you like to see all vacancies, including the company name, "
+        "vacancy title, salary, and link? (yes/no): "
+    ).casefold()
+    if user_input == "yes":
         return_list = db_manager.get_all_vacancies()
         for vacancy in return_list:
             print(
-                f"Компания: {vacancy[0]}, {vacancy[1]}, {vacancy[2]} руб. , {vacancy[3]}"
+                f"Company: {vacancy[0]}, {vacancy[1]}, "
+                f"{vacancy[2]} RUB, {vacancy[3]}"
             )
 
-    user_input = input("Хотите получить среднюю зарплату по вакансиям? да/нет: ")
-    if user_input == "да":
-        print(f"{db_manager.get_avg_salary()} руб.")
+    user_input = input(
+        "Would you like to see the average salary across all vacancies? (yes/no): "
+    ).casefold()
+    if user_input == "yes":
+        print(f"{db_manager.get_avg_salary()} RUB")
 
     user_input = input(
-        "Хотите получить список всех вакансий, у которых зарплата выше средней по всем вакансиям? да/нет: "
-    )
-    if user_input == "да":
+        "Would you like to see all vacancies with a salary above the average? (yes/no): "
+    ).casefold()
+    if user_input == "yes":
         return_list = db_manager.get_vacancies_with_higher_salary()
         for vacancy in return_list:
             print(
-                f"ID компании: {vacancy[0]}, ID вакансии: {vacancy[1]}, {vacancy[2]}, {vacancy[3]} руб. , {vacancy[4]}"
+                f"Company ID: {vacancy[0]}, Vacancy ID: {vacancy[1]}, "
+                f"{vacancy[2]}, {vacancy[3]} RUB, {vacancy[4]}"
             )
 
     user_input = input(
-        "Хотите получить список всех вакансий, в названии которых содержатся переданные в метод слова, например "
-        "python? да/нет: "
-    )
-    if user_input == "да":
-        word_input = input("Введите слово для фильтрации: ").lower()
+        "Would you like to search for vacancies whose titles contain a specific keyword? (yes/no): "
+    ).casefold()
+    if user_input == "yes":
+        word_input = input("Enter a keyword to filter vacancies: ")
         return_list = db_manager.get_vacancies_with_keyword(word_input)
         for vacancy in return_list:
             if vacancy[3] is None:
                 print(
-                    f"ID компании: {vacancy[0]}, ID вакансии: {vacancy[1]}, {vacancy[2]}, {vacancy[3]}, {vacancy[4]}"
+                    f"Company ID: {vacancy[0]}, Vacancy ID: {vacancy[1]}, "
+                    f"{vacancy[2]}, {vacancy[3]}, {vacancy[4]}"
                 )
             else:
                 print(
-                    f"ID компании: {vacancy[0]}, ID вакансии: {vacancy[1]}, {vacancy[2]}, {vacancy[3]} руб. , "
-                    f"{vacancy[4]}"
+                    f"Company ID: {vacancy[0]}, Vacancy ID: {vacancy[1]}, "
+                    f"{vacancy[2]}, {vacancy[3]} RUB, {vacancy[4]}"
                 )
 
 
-main()
-
-# for ma in main:
-#     for m in ma["vacancies"]:
-#         print(m["salary"])
+if __name__ == "__main__":
+    main()
